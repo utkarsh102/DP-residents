@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Divyansh Pratham Resident Portal — Your community hub for facilities, notices, contacts, and society information. Ahinsa Khand 2, Indirapuram.">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%232D6A4F'/><text x='16' y='23' text-anchor='middle' font-family='serif' font-size='20' font-weight='bold' fill='%23FFFFFF'>D</text></svg>">
+  <title>Divyansh Pratham — Resident Portal</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Bricolage+Grotesque:opsz,wght@12..96,300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            bg: '#F0F4F1',
+            surface: '#FFFFFF',
+            accent: '#2D6A4F',
+            'accent-light': '#40916C',
+            'accent-pale': '#D8F3DC',
+            text: '#1A2B22',
+            muted: '#5A7266',
+          },
+          fontFamily: {
+            display: ['Instrument Serif', 'serif'],
+            body: ['Bricolage Grotesque', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    :root {
+      --bg: #F0F4F1; --surface: #FFFFFF;
+      --accent: #2D6A4F; --accent-rgb: 45, 106, 79;
+      --accent-light: #40916C; --accent-pale: #D8F3DC;
+      --text: #1A2B22; --muted: #5A7266;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    * { -webkit-font-smoothing: antialiased; }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'Bricolage Grotesque', sans-serif; overflow-x: hidden; }
+    .font-display { font-family: 'Instrument Serif', serif; }
+
+    /* Scroll progress */
+    #scroll-bar { position: fixed; top: 0; left: 0; height: 3px; background: var(--accent-light); z-index: 9999; width: 0%; transition: width 0.1s linear; }
+
+    /* Nav scroll effect */
+    nav { transition: background 0.3s, box-shadow 0.3s; }
+    nav.scrolled { background: rgba(255,255,255,0.97) !important; box-shadow: 0 1px 20px rgba(0,0,0,0.08); }
+
+    /* Emergency bar */
+    .emergency-bar { background: #B91C1C; }
+
+    /* Quick links */
+    .quick-card { background: var(--surface); border-radius: 16px; transition: transform 0.2s, box-shadow 0.2s; border: 1px solid rgba(45,106,79,0.1); }
+    .quick-card:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(45,106,79,0.12); }
+
+    /* Amenity cards */
+    .amenity-card { background: var(--surface); border-radius: 14px; border: 1px solid rgba(45,106,79,0.1); transition: all 0.25s; }
+    .amenity-card:hover { border-color: var(--accent); background: var(--accent-pale); }
+
+    /* Notice board */
+    .notice-tag { font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; padding: 3px 10px; border-radius: 99px; }
+    .notice-urgent { background: #FEE2E2; color: #B91C1C; }
+    .notice-event { background: var(--accent-pale); color: var(--accent); }
+    .notice-info { background: #E0F2FE; color: #0369A1; }
+    .notice-general { background: #F3F4F6; color: #374151; }
+
+    /* Committee cards */
+    .committee-card { background: var(--surface); border-radius: 20px; border: 1px solid rgba(45,106,79,0.1); transition: transform 0.25s, box-shadow 0.25s; }
+    .committee-card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(45,106,79,0.12); }
+    .avatar-ring { width: 80px; height: 80px; border-radius: 50%; background: var(--accent-pale); border: 3px solid var(--accent-light); display: flex; align-items: center; justify-content: center; font-family: 'Instrument Serif', serif; font-size: 28px; color: var(--accent); margin: 0 auto 16px; }
+
+    /* Rules accordion */
+    .rule-item { border-bottom: 1px solid rgba(45,106,79,0.1); }
+    .rule-item:last-child { border-bottom: none; }
+
+    /* Maintenance steps */
+    .step-num { width: 36px; height: 36px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; flex-shrink: 0; }
+
+    /* Gallery */
+    .gallery-grid { columns: 2; gap: 12px; }
+    @media(min-width: 768px) { .gallery-grid { columns: 3; } }
+    @media(min-width: 1024px) { .gallery-grid { columns: 4; } }
+    .gallery-img { break-inside: avoid; margin-bottom: 12px; border-radius: 10px; overflow: hidden; cursor: pointer; }
+    .gallery-img img { width: 100%; display: block; transition: transform 0.4s; }
+    .gallery-img:hover img { transform: scale(1.04); }
+
+    /* Lightbox */
+    #lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 9000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+    #lightbox.active { opacity: 1; pointer-events: all; }
+    #lightbox img { max-width: 90vw; max-height: 90vh; border-radius: 8px; }
+
+    /* Contact cards */
+    .contact-card { background: var(--surface); border-radius: 16px; border: 1px solid rgba(45,106,79,0.1); transition: all 0.25s; }
+    .contact-card:hover { border-color: var(--accent); box-shadow: 0 8px 24px rgba(45,106,79,0.1); }
+
+    /* WhatsApp group button */
+    .wa-btn { background: #25D366; color: white; border-radius: 12px; transition: background 0.2s, transform 0.2s; }
+    .wa-btn:hover { background: #128C7E; transform: translateY(-2px); }
+
+    /* Section fade-in (GSAP) */
+    .reveal { opacity: 0; transform: translateY(28px); }
+
+    /* Footer */
+    footer { background: var(--text); color: rgba(255,255,255,0.7); }
+    footer .accent { color: var(--accent-light); }
+
+    /* Mobile bottom bar */
+    .mobile-bottom { display: none; }
+    @media(max-width: 768px) {
+      .mobile-bottom { display: flex; position: fixed; bottom: 0; left: 0; right: 0; z-index: 500; background: var(--surface); border-top: 1px solid rgba(45,106,79,0.15); padding: 10px 16px 16px; gap: 8px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Scroll progress bar -->
+<div id="scroll-bar"></div>
+
+<!-- Lightbox -->
+<div id="lightbox" onclick="closeLightbox()">
+  <img id="lightbox-img" src="" alt="">
+  <button onclick="closeLightbox()" style="position:absolute;top:20px;right:24px;color:white;font-size:32px;background:none;border:none;cursor:pointer;">✕</button>
+</div>
+
+<!-- ─── PRELOADER ─── -->
+<div id="preloader" style="position:fixed;inset:0;background:var(--accent);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;">
+  <div style="font-family:'Instrument Serif',serif;font-size:42px;color:white;letter-spacing:-1px;">DP</div>
+  <div style="color:rgba(255,255,255,0.7);font-size:13px;letter-spacing:0.15em;text-transform:uppercase;">Resident Portal</div>
+  <div style="width:48px;height:2px;background:rgba(255,255,255,0.3);border-radius:99px;margin-top:8px;overflow:hidden;">
+    <div id="loader-bar" style="height:100%;background:white;width:0%;transition:width 0.8s ease;border-radius:99px;"></div>
+  </div>
+</div>
+
+<!-- ─── EMERGENCY BAR ─── -->
+<div class="emergency-bar text-white text-center py-2 text-sm font-semibold tracking-wide">
+  🚨 Emergency: Security — <a href="tel:919999000001" class="underline">+91 99990 00001</a> &nbsp;|&nbsp; Fire / Police — <a href="tel:101" class="underline">101</a> / <a href="tel:100" class="underline">100</a>
+  &nbsp;<span class="opacity-60 text-xs">(replace with actual numbers)</span>
+</div>
+
+<!-- ─── NAVBAR ─── -->
+<nav id="navbar" class="sticky top-0 z-50 bg-transparent transition-all duration-300">
+  <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div style="width:38px;height:38px;border-radius:10px;background:var(--accent);display:flex;align-items:center;justify-content:center;">
+        <span style="font-family:'Instrument Serif',serif;color:white;font-size:18px;font-weight:700;">D</span>
+      </div>
+      <div>
+        <div class="font-display text-text font-semibold" style="font-size:16px;line-height:1.1;">Divyansh Pratham</div>
+        <div class="text-muted text-xs tracking-wide">Resident Portal</div>
+      </div>
+    </div>
+
+    <!-- Desktop Nav -->
+    <div class="hidden lg:flex items-center gap-6 text-sm font-medium text-muted">
+      <a href="#facilities" class="hover:text-accent transition-colors">Facilities</a>
+      <a href="#notices" class="hover:text-accent transition-colors">Notices</a>
+      <a href="#committee" class="hover:text-accent transition-colors">Committee</a>
+      <a href="#rules" class="hover:text-accent transition-colors">Rules</a>
+      <a href="#maintenance" class="hover:text-accent transition-colors">Maintenance</a>
+      <a href="#contacts" class="hover:text-accent transition-colors">Contacts</a>
+      <a href="#gallery" class="hover:text-accent transition-colors">Gallery</a>
+    </div>
+
+    <!-- Mobile menu toggle -->
+    <button id="menu-toggle" class="lg:hidden p-2 rounded-lg" style="color:var(--text);" aria-label="Menu">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Mobile menu -->
+  <div id="mobile-menu" class="hidden lg:hidden bg-surface border-t px-6 pb-4 pt-2 space-y-1" style="border-color:rgba(45,106,79,0.1);">
+    <a href="#facilities" class="block py-2 text-muted hover:text-accent text-sm">Facilities</a>
+    <a href="#notices" class="block py-2 text-muted hover:text-accent text-sm">Notices</a>
+    <a href="#committee" class="block py-2 text-muted hover:text-accent text-sm">Committee</a>
+    <a href="#rules" class="block py-2 text-muted hover:text-accent text-sm">Rules</a>
+    <a href="#maintenance" class="block py-2 text-muted hover:text-accent text-sm">Maintenance</a>
+    <a href="#contacts" class="block py-2 text-muted hover:text-accent text-sm">Contacts</a>
+    <a href="#gallery" class="block py-2 text-muted hover:text-accent text-sm">Gallery</a>
+  </div>
+</nav>
+
+<!-- ─── HERO ─── -->
+<section class="relative overflow-hidden" style="min-height:88vh;display:flex;align-items:center;">
+  <!-- Background pattern -->
+  <div style="position:absolute;inset:0;background:linear-gradient(135deg, #E8F5E9 0%, #F0F4F1 50%, #E0F2E9 100%);"></div>
+  <div style="position:absolute;inset:0;opacity:0.04;background-image:url('data:image/svg+xml,<svg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'><g fill=\'none\' fill-rule=\'evenodd\'><g fill=\'%232D6A4F\' fill-opacity=\'1\'><circle cx=\'30\' cy=\'30\' r=\'1.5\'/></g></g></svg>');"></div>
+
+  <!-- Decorative circle -->
+  <div style="position:absolute;right:-120px;top:-80px;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle, rgba(64,145,108,0.12) 0%, transparent 70%);pointer-events:none;"></div>
+
+  <div class="relative max-w-7xl mx-auto px-6 py-24 grid lg:grid-cols-2 gap-16 items-center">
+    <div>
+      <div id="hero-badge" class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium mb-8" style="background:var(--accent-pale);color:var(--accent);">
+        <span style="width:8px;height:8px;border-radius:50%;background:var(--accent-light);display:inline-block;animation:pulse 2s infinite;"></span>
+        Welcome home, neighbour
+      </div>
+
+      <h1 id="hero-h1" class="font-display text-text mb-6" style="font-size:clamp(36px,5vw,60px);line-height:1.1;letter-spacing:-1.5px;">
+        Your home.<br>
+        Your community.<br>
+        <em style="color:var(--accent);">Your portal.</em>
+      </h1>
+
+      <p id="hero-sub" class="text-muted mb-10" style="font-size:18px;line-height:1.7;max-width:500px;">
+        Everything about Divyansh Pratham — facilities, notices, your management committee, maintenance, and more — in one place, for all 207 families of Ahinsa Khand 2.
+      </p>
+
+      <div id="hero-cta" class="flex flex-wrap gap-3">
+        <a href="#notices" class="px-6 py-3 rounded-xl text-white font-semibold text-sm transition-all hover:-translate-y-0.5" style="background:var(--accent);box-shadow:0 4px 16px rgba(45,106,79,0.3);">
+          View Latest Notices
+        </a>
+        <a href="#contacts" class="px-6 py-3 rounded-xl font-semibold text-sm transition-all hover:-translate-y-0.5" style="background:var(--surface);color:var(--accent);border:1.5px solid var(--accent);">
+          Emergency Contacts
+        </a>
+      </div>
+    </div>
+
+    <!-- Stats grid -->
+    <div id="hero-stats" class="grid grid-cols-2 gap-4">
+      <div class="quick-card p-6 text-center col-span-2 sm:col-span-1">
+        <div class="font-display text-4xl font-bold" style="color:var(--accent);">207</div>
+        <div class="text-muted text-sm mt-1">Families</div>
+      </div>
+      <div class="quick-card p-6 text-center">
+        <div class="font-display text-4xl font-bold" style="color:var(--accent);">19</div>
+        <div class="text-muted text-sm mt-1">Floors</div>
+      </div>
+      <div class="quick-card p-6 text-center">
+        <div class="font-display text-4xl font-bold" style="color:var(--accent);">17+</div>
+        <div class="text-muted text-sm mt-1">Amenities</div>
+      </div>
+      <div class="quick-card p-6 text-center">
+        <div class="font-display text-4xl font-bold" style="color:var(--accent);">10+</div>
+        <div class="text-muted text-sm mt-1">Years Together</div>
+      </div>
+      <div class="quick-card p-6 text-center col-span-2 sm:col-span-1" style="background:var(--accent);">
+        <div class="font-display text-3xl font-bold text-white">4.1 ★</div>
+        <div class="text-sm mt-1" style="color:rgba(255,255,255,0.8);">Justdial Rating</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── QUICK ACCESS ─── -->
+<section class="py-10 px-6" style="background:var(--surface);border-top:1px solid rgba(45,106,79,0.08);border-bottom:1px solid rgba(45,106,79,0.08);">
+  <div class="max-w-7xl mx-auto">
+    <p class="text-center text-sm text-muted mb-6 tracking-widest uppercase font-medium">Quick Access</p>
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 reveal">
+      <a href="#facilities" class="quick-card p-4 text-center group">
+        <div class="text-2xl mb-2">🏊</div>
+        <div class="text-xs font-semibold text-text group-hover:text-accent transition-colors">Facilities</div>
+      </a>
+      <a href="#notices" class="quick-card p-4 text-center group">
+        <div class="text-2xl mb-2">📋</div>
+        <div class="text-xs font-semibold text-text group-hover:text-accent transition-colors">Notice Board</div>
+      </a>
+      <a href="#committee" class="quick-card p-4 text-center group">
+        <div class="text-2xl mb-2">👥</div>
+        <div class="text-xs font-semibold text-text group-hover:text-accent transition-colors">Committee</div>
+      </a>
+      <a href="#maintenance" class="quick-card p-4 text-center group">
+        <div class="text-2xl mb-2">🔧</div>
+        <div class="text-xs font-semibold text-text group-hover:text-accent transition-colors">Maintenance</div>
+      </a>
+      <a href="#rules" class="quick-card p-4 text-center group">
+        <div class="text-2xl mb-2">📜</div>
+        <div class="text-xs font-semibold text-text group-hover:text-accent transition-colors">Society Rules</div>
+      </a>
+      <a href="#contacts" class="quick-card p-4 text-center group">
+        <div class="text-2xl mb-2">📞</div>
+        <div class="text-xs font-semibold text-text group-hover:text-accent transition-colors">Contacts</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ─── SECTION 1: FACILITIES & AMENITIES ─── -->
+<section id="facilities" class="py-24 px-6">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center mb-16 reveal">
+      <p class="text-sm font-semibold tracking-widest uppercase mb-3" style="color:var(--accent);">What's Inside</p>
+      <h2 class="font-display text-text mb-4" style="font-size:clamp(30px,4vw,48px);">Your Facilities</h2>
+      <p class="text-muted mx-auto" style="max-width:540px;font-size:16px;line-height:1.7;">All amenities available to every resident of Divyansh Pratham — and their operating hours.</p>
+    </div>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 reveal">
+
+      <div class="amenity-card p-5">
+        <div class="text-3xl mb-3">🏊‍♂️</div>
+        <div class="font-semibold text-text text-sm mb-1">Swimming Pool</div>
+        <div class="text-muted text-xs">6:00 AM – 9:00 AM &amp; 5:00 PM – 8:00 PM</div>
+        <div class="text-muted text-xs mt-1">Adults only: 9 PM – 10 PM</div>
+      </div>
+
+      <div class="amenity-card p-5">
+        <div class="text-3xl mb-3">🏋️</div>
+        <div class="font-semibold text-text text-sm mb-1">Gymnasium</div>
+        <div class="text-muted text-xs">5:30 AM – 10:00 PM daily</div>
+        <div class="text-muted text-xs mt-1">Trainer: Tue, Thu, Sat — 7 AM</div>
+      </div>
+
+      <div class="amenity-card p-5">
+        <div class="text-3xl mb-3">🧘</div>
+        <div class="font-semibold text-text text-sm mb-1">Yoga Terrace</div>
+        <div class="text-muted text-xs">6:00 AM – 8:00 AM</div>
+        <div class="text-muted text-xs mt-1">Register with Secretary</div>
+      </div>
+
+      <div class="amenity-card p-5">
+        <div class="text-3xl mb-3">🎮</div>
+        <div class="font-semibold text-text text-sm mb-1">Children's Play Area</div>
+        <div class="text-muted text-xs">7:00 AM – 9:00 PM</div>
+        <div class="text-muted text-xs mt-1">Ages 3–14 years</div>
+      </div>
+
+      <div class="amenity-card p-5">
+        <div class="text-3xl mb-3">🏏</div>
+        <div class="font-semibold text-text text-sm mb-1">Cricket Net</div>
+        <div class="text-muted text-xs">5:30 AM – 9:00 AM</div>
+        <div class="text-muted text-xs mt-1">Book 24h in advance</div>
+      </div>
+
+      <div class="amenity-card p-5">
+        <div class="text-3xl mb-3">🏸</div>
+        <div class="font-semibold text-text text-sm mb-1">Badminton Court</div>
+        <div class="text-muted text-xs">6:00 AM – 10:00 AM &amp; 5:00 PM – 9:00 PM</div>
+        <div class="text-muted text-xs mt-1">Members get priority booking</div>
+      </div>
+
+      <div class="amenity-card p-5">
+        <div class="text-3xl mb-3">🎱</div>
+        <div class="font-semibold text-text text-sm mb-1">Indoor Games Room</div>
+        <div class="text-muted text-xs">10:00 AM – 10:00 PM</div>
+        <div class="text-muted text-xs mt-1">TT, Carrom, Chess</div>
+      </div>
+
+      <div class="amenity-card p-5">
+        <div class="text-3xl mb-3">📚</div>
+        <div class="font-semibold text-text text-sm mb-1">Library / Reading Room</div>
+        <div class="text-muted text-xs">8:00 AM – 9:00 PM</div>
+        <div class="text-muted text-xs mt-1">Silence zone after 6 PM</div>
+      </div>
+
+      <div class="amenity-card p-5">
+        <div class="text-3xl mb-3">🎉</div>
+        <div class="font-semibold text-text text-sm mb-1">Community Hall</div>
+        <div class="text-muted text-xs">Available on booking</div>
+        <div class="text-muted text-xs mt-1">Capacity: 150 people · ₹5,000/day</div>
+      </div>
+
+      <div class="amenity-card p-5">
+        <div class="text-3xl mb-3">🌳</div>
+        <div class="font-semibold text-text text-sm mb-1">Garden &amp; Walking Track</div>
+        <div class="text-muted text-xs">5:00 AM – 10:00 PM</div>
+        <div class="text-muted text-xs mt-1">Pets allowed until 8 AM</div>
+      </div>
+
+      <div class="amenity-card p-5">
+        <div class="text-3xl mb-3">🅿️</div>
+        <div class="font-semibold text-text text-sm mb-1">Covered Parking</div>
+        <div class="text-muted text-xs">1 slot per flat</div>
+        <div class="text-muted text-xs mt-1">2nd slot: ₹500/month</div>
+      </div>
+
+      <div class="amenity-card p-5">
+        <div class="text-3xl mb-3">⚡</div>
+        <div class="font-semibold text-text text-sm mb-1">Power Backup</div>
+        <div class="text-muted text-xs">100% DG backup for common areas</div>
+        <div class="text-muted text-xs mt-1">50% backup per flat</div>
+      </div>
+
+      <div class="amenity-card p-5">
+        <div class="text-3xl mb-3">🛡️</div>
+        <div class="font-semibold text-text text-sm mb-1">CCTV &amp; Security</div>
+        <div class="text-muted text-xs">24 × 7 surveillance</div>
+        <div class="text-muted text-xs mt-1">3 guards: Gate, Tower A, Tower B</div>
+      </div>
+
+      <div class="amenity-card p-5">
+        <div class="text-3xl mb-3">♿</div>
+        <div class="font-semibold text-text text-sm mb-1">Lifts (×6)</div>
+        <div class="text-muted text-xs">2 per tower, wheelchair-accessible</div>
+        <div class="text-muted text-xs mt-1">AMC: Otis India</div>
+      </div>
+
+      <div class="amenity-card p-5">
+        <div class="text-3xl mb-3">🗑️</div>
+        <div class="font-semibold text-text text-sm mb-1">Waste Management</div>
+        <div class="text-muted text-xs">Collection: 7 AM &amp; 7 PM daily</div>
+        <div class="text-muted text-xs mt-1">Segregate wet / dry / e-waste</div>
+      </div>
+
+      <div class="amenity-card p-5">
+        <div class="text-3xl mb-3">🏥</div>
+        <div class="font-semibold text-text text-sm mb-1">First-Aid Room</div>
+        <div class="text-muted text-xs">Ground floor, Tower A</div>
+        <div class="text-muted text-xs mt-1">AED available · Call security to open</div>
+      </div>
+
+      <div class="amenity-card p-5">
+        <div class="text-3xl mb-3">🚿</div>
+        <div class="font-semibold text-text text-sm mb-1">RO Water Supply</div>
+        <div class="text-muted text-xs">24-hour supply</div>
+        <div class="text-muted text-xs mt-1">Purifier serviced quarterly</div>
+      </div>
+
+      <div class="amenity-card p-5">
+        <div class="text-3xl mb-3">📦</div>
+        <div class="font-semibold text-text text-sm mb-1">Package Room</div>
+        <div class="text-muted text-xs">Parcel storage at gate</div>
+        <div class="text-muted text-xs mt-1">Collect within 3 days</div>
+      </div>
+    </div>
+
+    <div class="mt-10 p-5 rounded-2xl reveal" style="background:var(--accent-pale);border:1px dashed var(--accent-light);">
+      <p class="text-sm" style="color:var(--accent);">
+        <strong>Booking required</strong> for: Community Hall, Badminton Court, Cricket Net, Swimming Pool (private sessions). Contact the office at <strong>Ext. 100</strong> or WhatsApp the Secretary.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── SECTION 2: NOTICE BOARD ─── -->
+<section id="notices" class="py-24 px-6" style="background:var(--surface);">
+  <div class="max-w-5xl mx-auto">
+    <div class="text-center mb-16 reveal">
+      <p class="text-sm font-semibold tracking-widest uppercase mb-3" style="color:var(--accent);">Stay Updated</p>
+      <h2 class="font-display text-text mb-4" style="font-size:clamp(30px,4vw,48px);">Notice Board</h2>
+      <p class="text-muted" style="font-size:16px;">Important announcements, upcoming events, and circulars from the management committee.</p>
+    </div>
+
+    <div class="space-y-4 reveal" x-data="{ activeNotice: null }">
+
+      <!-- Notice 1 - Urgent -->
+      <div class="contact-card p-6 cursor-pointer" @click="activeNotice = activeNotice === 1 ? null : 1">
+        <div class="flex items-start gap-4">
+          <div class="text-2xl">📢</div>
+          <div class="flex-1">
+            <div class="flex flex-wrap items-center gap-2 mb-2">
+              <span class="notice-tag notice-urgent">Urgent</span>
+              <span class="text-xs text-muted">April 18, 2026</span>
+            </div>
+            <div class="font-semibold text-text text-sm">Water supply interruption — Tower B, 15th–19th Floor</div>
+            <div x-show="activeNotice === 1" x-transition class="mt-3 text-muted text-sm leading-relaxed">
+              Due to plumbing maintenance work, water supply to Tower B floors 15–19 will be interrupted on <strong>April 20, 2026 from 10 AM to 4 PM</strong>. Please store adequate water beforehand. We apologise for the inconvenience. Contact the maintenance office (Ext. 103) for any urgent needs. Work is being done to fix a persistent leakage issue reported by multiple residents.
+            </div>
+          </div>
+          <svg class="flex-shrink-0 text-muted transition-transform" :class="activeNotice === 1 ? 'rotate-180' : ''" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </div>
+
+      <!-- Notice 2 - Event -->
+      <div class="contact-card p-6 cursor-pointer" @click="activeNotice = activeNotice === 2 ? null : 2">
+        <div class="flex items-start gap-4">
+          <div class="text-2xl">🎉</div>
+          <div class="flex-1">
+            <div class="flex flex-wrap items-center gap-2 mb-2">
+              <span class="notice-tag notice-event">Event</span>
+              <span class="text-xs text-muted">April 15, 2026</span>
+            </div>
+            <div class="font-semibold text-text text-sm">Annual Society Day — May 4, 2026 | 6:00 PM onwards</div>
+            <div x-show="activeNotice === 2" x-transition class="mt-3 text-muted text-sm leading-relaxed">
+              Join us for the Annual Divyansh Pratham Society Day at the Community Hall. Cultural performances by residents, prize distribution for the Kids Talent Show, and a community dinner. Entry is free for all residents. Kindly register at the office (or WhatsApp Secretary) by April 28 for catering purposes. Volunteers needed — contact Mr. Sharma at Ext. 101.
+            </div>
+          </div>
+          <svg class="flex-shrink-0 text-muted transition-transform" :class="activeNotice === 2 ? 'rotate-180' : ''" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </div>
+
+      <!-- Notice 3 - Info -->
+      <div class="contact-card p-6 cursor-pointer" @click="activeNotice = activeNotice === 3 ? null : 3">
+        <div class="flex items-start gap-4">
+          <div class="text-2xl">💰</div>
+          <div class="flex-1">
+            <div class="flex flex-wrap items-center gap-2 mb-2">
+              <span class="notice-tag notice-info">Finance</span>
+              <span class="text-xs text-muted">April 10, 2026</span>
+            </div>
+            <div class="font-semibold text-text text-sm">Maintenance charges for Q2 FY 2026–27 — Due May 10, 2026</div>
+            <div x-show="activeNotice === 3" x-transition class="mt-3 text-muted text-sm leading-relaxed">
+              Q2 maintenance charges (April–June 2026) are due by <strong>May 10, 2026</strong>. 2BHK: ₹3,500/month | 3BHK: ₹4,200/month | 4BHK: ₹5,500/month. Pay via bank transfer (account details on the circular pinned outside office) or scan the QR code on the notice board. Late payment attracts a ₹500 fine after May 25. For waivers due to hardship, speak directly to the Treasurer.
+            </div>
+          </div>
+          <svg class="flex-shrink-0 text-muted transition-transform" :class="activeNotice === 3 ? 'rotate-180' : ''" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </div>
+
+      <!-- Notice 4 - General -->
+      <div class="contact-card p-6 cursor-pointer" @click="activeNotice = activeNotice === 4 ? null : 4">
+        <div class="flex items-start gap-4">
+          <div class="text-2xl">🐶</div>
+          <div class="flex-1">
+            <div class="flex flex-wrap items-center gap-2 mb-2">
+              <span class="notice-tag notice-general">Guidelines</span>
+              <span class="text-xs text-muted">April 5, 2026</span>
+            </div>
+            <div class="font-semibold text-text text-sm">Updated Pet Policy — mandatory registration by May 1</div>
+            <div x-show="activeNotice === 4" x-transition class="mt-3 text-muted text-sm leading-relaxed">
+              All pet owners must register their pets with the society office by <strong>May 1, 2026</strong>. Required documents: vaccination records (last 12 months), breed certificate, and owner's flat number. Unregistered pets found in common areas after May 1 will result in a ₹1,000 fine. Pets must be on leash in all common areas at all times. Dog walking permitted in the garden area only between 5–8 AM and 7–9 PM.
+            </div>
+          </div>
+          <svg class="flex-shrink-0 text-muted transition-transform" :class="activeNotice === 4 ? 'rotate-180' : ''" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </div>
+
+      <!-- Notice 5 - Event -->
+      <div class="contact-card p-6 cursor-pointer" @click="activeNotice = activeNotice === 5 ? null : 5">
+        <div class="flex items-start gap-4">
+          <div class="text-2xl">🏡</div>
+          <div class="flex-1">
+            <div class="flex flex-wrap items-center gap-2 mb-2">
+              <span class="notice-tag notice-event">Event</span>
+              <span class="text-xs text-muted">March 28, 2026</span>
+            </div>
+            <div class="font-semibold text-text text-sm">Summer Camp for Kids — May 10 to June 5 (Registration open)</div>
+            <div x-show="activeNotice === 5" x-transition class="mt-3 text-muted text-sm leading-relaxed">
+              The society is organising a Summer Camp for children aged 5–14 from May 10 to June 5. Activities include: badminton coaching, swimming lessons, art &amp; craft, and yoga. Timings: 8 AM – 12 PM daily. Fee: ₹2,500 for the full session (subsidised by the society fund). Maximum 40 children. First come, first served. Register at the office or with Secretary.
+            </div>
+          </div>
+          <svg class="flex-shrink-0 text-muted transition-transform" :class="activeNotice === 5 ? 'rotate-180' : ''" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- WhatsApp group CTA -->
+    <div class="mt-10 p-6 rounded-2xl reveal" style="background:var(--text);color:white;">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+        <div class="flex-1">
+          <div class="font-display text-xl mb-1">Never miss a notice.</div>
+          <div class="text-sm" style="color:rgba(255,255,255,0.65);">Join the official Divyansh Pratham Residents WhatsApp Group. Verified residents only.</div>
+        </div>
+        <a href="https://wa.me/919999000001?text=Hi%2C%20I%20am%20a%20resident%20of%20Divyansh%20Pratham%20and%20would%20like%20to%20join%20the%20official%20WhatsApp%20group." target="_blank" class="wa-btn px-5 py-3 font-semibold text-sm flex-shrink-0 flex items-center gap-2">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.553 4.112 1.524 5.838L.057 23.986l6.304-1.654A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.893 0-3.667-.523-5.183-1.433l-.371-.222-3.842 1.008 1.026-3.738-.242-.386A10 10 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+          Join WhatsApp Group
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── SECTION 3: MANAGEMENT COMMITTEE ─── -->
+<section id="committee" class="py-24 px-6">
+  <div class="max-w-6xl mx-auto">
+    <div class="text-center mb-16 reveal">
+      <p class="text-sm font-semibold tracking-widest uppercase mb-3" style="color:var(--accent);">Your Representatives</p>
+      <h2 class="font-display text-text mb-4" style="font-size:clamp(30px,4vw,48px);">Management Committee</h2>
+      <p class="text-muted" style="font-size:16px;max-width:500px;margin:0 auto;">Elected by residents, for residents. The committee manages the day-to-day running of our society.</p>
+    </div>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 reveal">
+
+      <!-- President -->
+      <div class="committee-card p-8 text-center" style="border-color:var(--accent);border-width:2px;">
+        <div class="avatar-ring">R</div>
+        <div class="inline-block px-3 py-1 rounded-full text-xs font-semibold mb-3" style="background:var(--accent);color:white;">President</div>
+        <div class="font-display text-xl text-text mb-1">Kapil Tyagi</div>
+        <div class="text-muted text-sm mb-4">Flat 14B, Tower A · Since 2022</div>
+        <div class="space-y-2">
+          <a href="tel:919867000002" class="flex items-center justify-center gap-2 text-sm text-muted hover:text-accent transition-colors">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.77a19.79 19.79 0 01-3.07-8.67A2 2 0 012 .82h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 8.09a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 15z"/></svg>
+            +91 98670 XXXXX
+          </a>
+          <a href="https://wa.me/919867000002" target="_blank" class="flex items-center justify-center gap-2 text-sm text-muted hover:text-accent transition-colors">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/></svg>
+            WhatsApp
+          </a>
+        </div>
+      </div>
+
+      <!-- Secretary -->
+      <div class="committee-card p-8 text-center">
+        <div class="avatar-ring">P</div>
+        <div class="inline-block px-3 py-1 rounded-full text-xs font-semibold mb-3" style="background:var(--accent-pale);color:var(--accent);">Secretary</div>
+        <div class="font-display text-xl text-text mb-1">Priya Mehta</div>
+        <div class="text-muted text-sm mb-4">Flat 7A, Tower B · Since 2022</div>
+        <div class="space-y-2">
+          <a href="tel:919867000003" class="flex items-center justify-center gap-2 text-sm text-muted hover:text-accent transition-colors">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.77a19.79 19.79 0 01-3.07-8.67A2 2 0 012 .82h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 8.09a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 15z"/></svg>
+            +91 98670 XXXXX
+          </a>
+          <a href="https://wa.me/919867000003" target="_blank" class="flex items-center justify-center gap-2 text-sm text-muted hover:text-accent transition-colors">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/></svg>
+            WhatsApp
+          </a>
+        </div>
+      </div>
+
+      <!-- Treasurer -->
+      <div class="committee-card p-8 text-center">
+        <div class="avatar-ring">A</div>
+        <div class="inline-block px-3 py-1 rounded-full text-xs font-semibold mb-3" style="background:var(--accent-pale);color:var(--accent);">Treasurer</div>
+        <div class="font-display text-xl text-text mb-1">Amit Agarwal</div>
+        <div class="text-muted text-sm mb-4">Flat 3C, Tower A · Since 2022</div>
+        <div class="space-y-2">
+          <a href="tel:919867000004" class="flex items-center justify-center gap-2 text-sm text-muted hover:text-accent transition-colors">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.77a19.79 19.79 0 01-3.07-8.67A2 2 0 012 .82h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 8.09a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 15z"/></svg>
+            +91 98670 XXXXX
+          </a>
+          <a href="https://wa.me/919867000004" target="_blank" class="flex items-center justify-center gap-2 text-sm text-muted hover:text-accent transition-colors">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/></svg>
+            WhatsApp
+          </a>
+        </div>
+      </div>
+
+      <!-- Committee Member 1 -->
+      <div class="committee-card p-6 text-center">
+        <div class="avatar-ring" style="width:60px;height:60px;font-size:22px;">S</div>
+        <div class="inline-block px-3 py-1 rounded-full text-xs font-medium mb-2" style="background:#F3F4F6;color:#374151;">Joint Secretary</div>
+        <div class="font-semibold text-text mb-0.5">Sunita Verma</div>
+        <div class="text-muted text-xs">Flat 11D, Tower B</div>
+      </div>
+
+      <!-- Committee Member 2 -->
+      <div class="committee-card p-6 text-center">
+        <div class="avatar-ring" style="width:60px;height:60px;font-size:22px;">V</div>
+        <div class="inline-block px-3 py-1 rounded-full text-xs font-medium mb-2" style="background:#F3F4F6;color:#374151;">Maintenance Head</div>
+        <div class="font-semibold text-text mb-0.5">Vijay Nair</div>
+        <div class="text-muted text-xs">Flat 6A, Tower A</div>
+      </div>
+
+      <!-- Committee Member 3 -->
+      <div class="committee-card p-6 text-center">
+        <div class="avatar-ring" style="width:60px;height:60px;font-size:22px;">K</div>
+        <div class="inline-block px-3 py-1 rounded-full text-xs font-medium mb-2" style="background:#F3F4F6;color:#374151;">Events Head</div>
+        <div class="font-semibold text-text mb-0.5">Kavita Singh</div>
+        <div class="text-muted text-xs">Flat 18C, Tower A</div>
+      </div>
+    </div>
+
+    <p class="text-center text-muted text-xs mt-8 reveal">Committee tenure: 2022–2026 · Elections scheduled for October 2026 · <a href="mailto:committee@divyanshpratham.in" class="text-accent hover:underline">committee@divyanshpratham.in</a></p>
+  </div>
+</section>
+
+<!-- ─── SECTION 4: SOCIETY RULES ─── -->
+<section id="rules" class="py-24 px-6" style="background:var(--surface);">
+  <div class="max-w-4xl mx-auto">
+    <div class="text-center mb-16 reveal">
+      <p class="text-sm font-semibold tracking-widest uppercase mb-3" style="color:var(--accent);">Living Together</p>
+      <h2 class="font-display text-text mb-4" style="font-size:clamp(30px,4vw,48px);">Society Rules &amp; Guidelines</h2>
+      <p class="text-muted" style="font-size:16px;">These guidelines keep Divyansh Pratham a great place for all 207 families. Please read and follow.</p>
+    </div>
+
+    <div class="contact-card reveal" x-data="{ open: null }">
+      <div class="p-6 border-b" style="border-color:rgba(45,106,79,0.1);">
+        <div class="flex items-center gap-3 mb-1">
+          <span class="text-xl">🔇</span>
+          <h3 class="font-semibold text-text">Noise &amp; Disturbance</h3>
+        </div>
+        <ul class="text-muted text-sm space-y-1.5 ml-8 mt-3">
+          <li>• Silence hours: <strong>11:00 PM – 6:00 AM</strong> (strictly enforced)</li>
+          <li>• No loud music, DJ, or speaker systems after 10 PM</li>
+          <li>• Drilling and construction work only between 9 AM – 6 PM, Mon–Sat</li>
+          <li>• No honking inside the society premises</li>
+        </ul>
+      </div>
+
+      <div class="p-6 border-b" style="border-color:rgba(45,106,79,0.1);">
+        <div class="flex items-center gap-3 mb-1">
+          <span class="text-xl">🅿️</span>
+          <h3 class="font-semibold text-text">Parking &amp; Vehicles</h3>
+        </div>
+        <ul class="text-muted text-sm space-y-1.5 ml-8 mt-3">
+          <li>• Park only in your allotted slot — violators will be towed</li>
+          <li>• No parking in fire lanes, near lifts, or visitor spots without a pass</li>
+          <li>• Visitor parking: maximum 48 hours; longer stays need office approval</li>
+          <li>• Commercial vehicles not permitted inside the society</li>
+          <li>• EV charging available at B4–B6 basement slots (₹8/unit)</li>
+        </ul>
+      </div>
+
+      <div class="p-6 border-b" style="border-color:rgba(45,106,79,0.1);">
+        <div class="flex items-center gap-3 mb-1">
+          <span class="text-xl">🗑️</span>
+          <h3 class="font-semibold text-text">Waste &amp; Cleanliness</h3>
+        </div>
+        <ul class="text-muted text-sm space-y-1.5 ml-8 mt-3">
+          <li>• Segregate waste: <span style="color:#166534;font-weight:600;">Green = wet</span>, <span style="color:#1D4ED8;font-weight:600;">Blue = dry</span>, <span style="color:#7C3AED;font-weight:600;">Purple = e-waste</span></li>
+          <li>• Do not throw garbage from windows or balconies — ₹2,000 fine</li>
+          <li>• Bulky items (furniture, appliances): inform office 24h before disposal</li>
+          <li>• Construction debris: resident's responsibility to arrange for removal</li>
+          <li>• No littering in common areas, stairwells, or lifts</li>
+        </ul>
+      </div>
+
+      <div class="p-6 border-b" style="border-color:rgba(45,106,79,0.1);">
+        <div class="flex items-center gap-3 mb-1">
+          <span class="text-xl">🛠️</span>
+          <h3 class="font-semibold text-text">Renovation &amp; Modifications</h3>
+        </div>
+        <ul class="text-muted text-sm space-y-1.5 ml-8 mt-3">
+          <li>• Written approval required before any structural renovation</li>
+          <li>• Exterior modifications (grills, AC units, satellite dishes) need committee approval</li>
+          <li>• No changes to common walls, plumbing shafts, or electrical mains</li>
+          <li>• Renovation workers must deposit ID at the gate; access 9 AM – 6 PM only</li>
+          <li>• Security deposit of ₹10,000 required — refunded after inspection</li>
+        </ul>
+      </div>
+
+      <div class="p-6 border-b" style="border-color:rgba(45,106,79,0.1);">
+        <div class="flex items-center gap-3 mb-1">
+          <span class="text-xl">🎊</span>
+          <h3 class="font-semibold text-text">Events &amp; Celebrations</h3>
+        </div>
+        <ul class="text-muted text-sm space-y-1.5 ml-8 mt-3">
+          <li>• Celebrations in common areas require advance booking at the office</li>
+          <li>• Flat celebrations must end by 11 PM; guests must exit by 11:30 PM</li>
+          <li>• Bursting of firecrackers is <strong>not permitted</strong> inside the society at any time</li>
+          <li>• DJs and live bands require special written permission from the President</li>
+          <li>• Guests using elevators after 10 PM must be accompanied by a resident</li>
+        </ul>
+      </div>
+
+      <div class="p-6 border-b" style="border-color:rgba(45,106,79,0.1);">
+        <div class="flex items-center gap-3 mb-1">
+          <span class="text-xl">🔐</span>
+          <h3 class="font-semibold text-text">Security &amp; Gate Policy</h3>
+        </div>
+        <ul class="text-muted text-sm space-y-1.5 ml-8 mt-3">
+          <li>• All visitors must register at the gate with photo ID before entry</li>
+          <li>• Delivery agents allowed only up to lobby — not to individual floors</li>
+          <li>• Domestic helpers must be registered with the office (annual renewal)</li>
+          <li>• Do not share gate access codes with outsiders</li>
+          <li>• Report any suspicious activity immediately to security (Ext. 100)</li>
+        </ul>
+      </div>
+
+      <div class="p-6">
+        <div class="flex items-center gap-3 mb-1">
+          <span class="text-xl">💵</span>
+          <h3 class="font-semibold text-text">Maintenance &amp; Fines</h3>
+        </div>
+        <ul class="text-muted text-sm space-y-1.5 ml-8 mt-3">
+          <li>• Maintenance due by the 10th of each month; ₹500 fine after 25th</li>
+          <li>• Persistent defaulters (3+ months): facility access suspended</li>
+          <li>• Fines for rule violations are deducted from security deposit or charged separately</li>
+          <li>• Appeal process: written letter to Secretary within 7 days of fine notice</li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="text-center text-muted text-xs mt-6 reveal">Full society bylaws available at the management office · Ground floor, Tower A · Office hours: Mon–Sat, 10 AM – 6 PM</p>
+  </div>
+</section>
+
+<!-- ─── SECTION 5: MAINTENANCE ─── -->
+<section id="maintenance" class="py-24 px-6">
+  <div class="max-w-6xl mx-auto">
+    <div class="text-center mb-16 reveal">
+      <p class="text-sm font-semibold tracking-widest uppercase mb-3" style="color:var(--accent);">Need Help?</p>
+      <h2 class="font-display text-text mb-4" style="font-size:clamp(30px,4vw,48px);">Maintenance &amp; Complaints</h2>
+      <p class="text-muted" style="font-size:16px;">How to pay your dues, raise a complaint, or request a repair — step by step.</p>
+    </div>
+
+    <div class="grid lg:grid-cols-2 gap-12 reveal">
+
+      <!-- Pay maintenance -->
+      <div>
+        <h3 class="font-display text-2xl text-text mb-6">Pay Maintenance</h3>
+        <div class="space-y-5">
+          <div class="flex gap-4">
+            <div class="step-num">1</div>
+            <div>
+              <div class="font-semibold text-text text-sm mb-1">Know your amount</div>
+              <div class="text-muted text-sm">2BHK: ₹3,500/mo · 3BHK: ₹4,200/mo · 4BHK: ₹5,500/mo (FY 2025–26 rates)</div>
+            </div>
+          </div>
+          <div class="flex gap-4">
+            <div class="step-num">2</div>
+            <div>
+              <div class="font-semibold text-text text-sm mb-1">Choose your payment method</div>
+              <div class="text-muted text-sm">UPI QR code at office / Bank transfer / Cash at office (receipt mandatory)</div>
+            </div>
+          </div>
+          <div class="flex gap-4">
+            <div class="step-num">3</div>
+            <div>
+              <div class="font-semibold text-text text-sm mb-1">Bank Transfer Details</div>
+              <div class="text-muted text-sm">
+                Account: <strong>Divyansh Pratham Welfare Society</strong><br>
+                Bank: HDFC Bank · A/C: XXXX XXXX XXXX<br>
+                IFSC: HDFC0001234 · Branch: Indirapuram
+              </div>
+            </div>
+          </div>
+          <div class="flex gap-4">
+            <div class="step-num">4</div>
+            <div>
+              <div class="font-semibold text-text text-sm mb-1">Send payment proof</div>
+              <div class="text-muted text-sm">WhatsApp screenshot to Treasurer (+91 98670 XXXXX) with your flat number</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-8 p-4 rounded-xl text-sm" style="background:var(--accent-pale);color:var(--accent);">
+          <strong>Due date:</strong> 10th of each month · <strong>Late fee:</strong> ₹500 after 25th
+        </div>
+      </div>
+
+      <!-- Raise a complaint -->
+      <div>
+        <h3 class="font-display text-2xl text-text mb-6">Raise a Complaint / Request Repair</h3>
+        <div class="space-y-5">
+          <div class="flex gap-4">
+            <div class="step-num">1</div>
+            <div>
+              <div class="font-semibold text-text text-sm mb-1">For urgent issues (lift stuck, water burst, power failure)</div>
+              <div class="text-muted text-sm">Call Maintenance directly at <strong>Ext. 103</strong> or <strong>+91 99990 00003</strong> — 24/7</div>
+            </div>
+          </div>
+          <div class="flex gap-4">
+            <div class="step-num">2</div>
+            <div>
+              <div class="font-semibold text-text text-sm mb-1">For non-urgent complaints</div>
+              <div class="text-muted text-sm">WhatsApp the Secretary with: your flat number, issue description, and a photo if possible</div>
+            </div>
+          </div>
+          <div class="flex gap-4">
+            <div class="step-num">3</div>
+            <div>
+              <div class="font-semibold text-text text-sm mb-1">Escalation (no response in 48 hours)</div>
+              <div class="text-muted text-sm">Contact the President directly. If still unresolved, raise at the monthly General Body Meeting</div>
+            </div>
+          </div>
+          <div class="flex gap-4">
+            <div class="step-num">4</div>
+            <div>
+              <div class="font-semibold text-text text-sm mb-1">Monthly GBM</div>
+              <div class="text-muted text-sm">Every <strong>1st Sunday</strong> at 11 AM in the Community Hall. All residents welcome.</div>
+            </div>
+          </div>
+        </div>
+
+        <a href="https://wa.me/919867000003?text=Hi%2C%20I%20am%20a%20resident%20of%20Divyansh%20Pratham%20(Flat%20__).%20I%20want%20to%20report%3A%20" target="_blank" class="wa-btn mt-8 inline-flex items-center gap-2 px-5 py-3 font-semibold text-sm">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/></svg>
+          Report via WhatsApp
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── SECTION 6: GALLERY ─── -->
+<section id="gallery" class="py-24 px-6" style="background:var(--surface);">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center mb-16 reveal">
+      <p class="text-sm font-semibold tracking-widest uppercase mb-3" style="color:var(--accent);">Our Community</p>
+      <h2 class="font-display text-text mb-4" style="font-size:clamp(30px,4vw,48px);">Life at Divyansh Pratham</h2>
+      <p class="text-muted" style="font-size:16px;">Moments from our community — events, festivals, and everyday life.</p>
+    </div>
+
+    <div class="gallery-grid reveal">
+      <div class="gallery-img" onclick="openLightbox('https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=1200')">
+        <img src="https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=600&auto=format&q=80" alt="Swimming pool">
+      </div>
+      <div class="gallery-img" onclick="openLightbox('https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=1200')">
+        <img src="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600&auto=format&q=80" alt="Gymnasium">
+      </div>
+      <div class="gallery-img" onclick="openLightbox('https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1200')">
+        <img src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=600&auto=format&q=80" alt="Society exterior">
+      </div>
+      <div class="gallery-img" onclick="openLightbox('https://images.unsplash.com/photo-1541544741938-0af808871cc0?w=1200')">
+        <img src="https://images.unsplash.com/photo-1541544741938-0af808871cc0?w=600&auto=format&q=80" alt="Garden and green spaces">
+      </div>
+      <div class="gallery-img" onclick="openLightbox('https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=1200')">
+        <img src="https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=600&auto=format&q=80" alt="Community gathering">
+      </div>
+      <div class="gallery-img" onclick="openLightbox('https://images.unsplash.com/photo-1503220317375-aaad61436b1b?w=1200')">
+        <img src="https://images.unsplash.com/photo-1503220317375-aaad61436b1b?w=600&auto=format&q=80" alt="Festive celebrations">
+      </div>
+      <div class="gallery-img" onclick="openLightbox('https://images.unsplash.com/photo-1596422846543-75c6fc197f07?w=1200')">
+        <img src="https://images.unsplash.com/photo-1596422846543-75c6fc197f07?w=600&auto=format&q=80" alt="Children's play area">
+      </div>
+      <div class="gallery-img" onclick="openLightbox('https://images.unsplash.com/photo-1600607688969-a5bfcd646154?w=1200')">
+        <img src="https://images.unsplash.com/photo-1600607688969-a5bfcd646154?w=600&auto=format&q=80" alt="Lobby">
+      </div>
+    </div>
+
+    <p class="text-center text-muted text-sm mt-8 reveal">Share your Divyansh Pratham moments · Tag <strong>#DivyanshPratham</strong> · <a href="https://wa.me/919867000003" class="text-accent hover:underline">Submit photos to Secretary</a></p>
+  </div>
+</section>
+
+<!-- ─── SECTION 7: EMERGENCY CONTACTS ─── -->
+<section id="contacts" class="py-24 px-6">
+  <div class="max-w-5xl mx-auto">
+    <div class="text-center mb-16 reveal">
+      <p class="text-sm font-semibold tracking-widest uppercase mb-3" style="color:var(--accent);">Always There</p>
+      <h2 class="font-display text-text mb-4" style="font-size:clamp(30px,4vw,48px);">Important Contacts</h2>
+      <p class="text-muted" style="font-size:16px;">Save these numbers in your phone. Tap to call directly.</p>
+    </div>
+
+    <!-- Emergency -->
+    <div class="mb-8 reveal">
+      <h3 class="text-xs font-bold tracking-widest uppercase text-red-700 mb-4">Emergency</h3>
+      <div class="grid sm:grid-cols-3 gap-4">
+        <a href="tel:919999000001" class="contact-card p-5 block" style="border-color:#FCA5A5;">
+          <div class="text-2xl mb-2">🚨</div>
+          <div class="font-semibold text-text text-sm mb-1">Society Security</div>
+          <div class="text-red-600 font-bold text-lg">Ext. 100</div>
+          <div class="text-muted text-xs mt-1">24 × 7</div>
+        </a>
+        <a href="tel:101" class="contact-card p-5 block" style="border-color:#FCA5A5;">
+          <div class="text-2xl mb-2">🔥</div>
+          <div class="font-semibold text-text text-sm mb-1">Fire Brigade</div>
+          <div class="text-red-600 font-bold text-lg">101</div>
+          <div class="text-muted text-xs mt-1">Noida Fire Station: 3.2 km</div>
+        </a>
+        <a href="tel:100" class="contact-card p-5 block" style="border-color:#FCA5A5;">
+          <div class="text-2xl mb-2">👮</div>
+          <div class="font-semibold text-text text-sm mb-1">Police</div>
+          <div class="text-red-600 font-bold text-lg">100</div>
+          <div class="text-muted text-xs mt-1">Indirapuram PS: 1.8 km</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- Society Office -->
+    <div class="mb-8 reveal">
+      <h3 class="text-xs font-bold tracking-widest uppercase text-muted mb-4">Society Office</h3>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <a href="tel:919867000002" class="contact-card p-5 block">
+          <div class="text-2xl mb-2">👤</div>
+          <div class="font-semibold text-text text-sm mb-1">President</div>
+          <div class="font-bold" style="color:var(--accent);">+91 98670 XXXXX</div>
+          <div class="text-muted text-xs mt-1">R. K. Sharma</div>
+        </a>
+        <a href="tel:919867000003" class="contact-card p-5 block">
+          <div class="text-2xl mb-2">📋</div>
+          <div class="font-semibold text-text text-sm mb-1">Secretary</div>
+          <div class="font-bold" style="color:var(--accent);">+91 98670 XXXXX</div>
+          <div class="text-muted text-xs mt-1">Priya Mehta</div>
+        </a>
+        <a href="tel:919867000004" class="contact-card p-5 block">
+          <div class="text-2xl mb-2">💰</div>
+          <div class="font-semibold text-text text-sm mb-1">Treasurer</div>
+          <div class="font-bold" style="color:var(--accent);">+91 98670 XXXXX</div>
+          <div class="text-muted text-xs mt-1">Amit Agarwal</div>
+        </a>
+        <a href="tel:919999000003" class="contact-card p-5 block">
+          <div class="text-2xl mb-2">🔧</div>
+          <div class="font-semibold text-text text-sm mb-1">Maintenance</div>
+          <div class="font-bold" style="color:var(--accent);">Ext. 103</div>
+          <div class="text-muted text-xs mt-1">24/7 for emergencies</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- Nearby Services -->
+    <div class="reveal">
+      <h3 class="text-xs font-bold tracking-widest uppercase text-muted mb-4">Nearby Services</h3>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="contact-card p-5">
+          <div class="text-2xl mb-2">🏥</div>
+          <div class="font-semibold text-text text-sm mb-1">Yatharth Hospital</div>
+          <div class="text-muted text-xs">Sector 110, Noida · 3.5 km</div>
+          <a href="tel:911204555000" class="font-bold text-sm mt-1 block" style="color:var(--accent);">0120-455 5000</a>
+        </div>
+        <div class="contact-card p-5">
+          <div class="text-2xl mb-2">🏥</div>
+          <div class="font-semibold text-text text-sm mb-1">Max Hospital</div>
+          <div class="text-muted text-xs">Vaishali, Ghaziabad · 4.2 km</div>
+          <a href="tel:911204555001" class="font-bold text-sm mt-1 block" style="color:var(--accent);">0120-455 5001</a>
+        </div>
+        <div class="contact-card p-5">
+          <div class="text-2xl mb-2">🚑</div>
+          <div class="font-semibold text-text text-sm mb-1">Ambulance (Govt.)</div>
+          <div class="text-muted text-xs">UP 108 Emergency</div>
+          <a href="tel:108" class="font-bold text-sm mt-1 block" style="color:var(--accent);">108</a>
+        </div>
+        <div class="contact-card p-5">
+          <div class="text-2xl mb-2">💊</div>
+          <div class="font-semibold text-text text-sm mb-1">Medanta Pharmacy</div>
+          <div class="text-muted text-xs">Ahinsa Khand 2 · 0.4 km · Open 24h</div>
+          <div class="text-muted text-xs mt-1">Nearest 24h pharmacy</div>
+        </div>
+        <div class="contact-card p-5">
+          <div class="text-2xl mb-2">🚇</div>
+          <div class="font-semibold text-text text-sm mb-1">Vaishali Metro</div>
+          <div class="text-muted text-xs">Blue Line · 2.26 km</div>
+          <div class="text-muted text-xs mt-1">First train: 6:00 AM</div>
+        </div>
+        <div class="contact-card p-5">
+          <div class="text-2xl mb-2">🏫</div>
+          <div class="font-semibold text-text text-sm mb-1">DPS Indirapuram</div>
+          <div class="text-muted text-xs">Opposite society · 0.1 km</div>
+          <a href="tel:911204555002" class="font-bold text-sm mt-1 block" style="color:var(--accent);">0120-455 5002</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── SECTION 8: ABOUT THE SOCIETY ─── -->
+<section class="py-24 px-6" style="background:var(--text);color:white;">
+  <div class="max-w-5xl mx-auto reveal">
+    <div class="text-center mb-12">
+      <p class="text-sm font-semibold tracking-widest uppercase mb-3" style="color:var(--accent-light);">Our Story</p>
+      <h2 class="font-display mb-4" style="font-size:clamp(28px,4vw,44px);">Ten years, 207 families, one address.</h2>
+    </div>
+
+    <div class="grid lg:grid-cols-2 gap-12 items-center">
+      <div>
+        <p style="color:rgba(255,255,255,0.75);font-size:16px;line-height:1.8;margin-bottom:16px;">
+          Divyansh Pratham was built with a single purpose: to give families in Indirapuram not just a place to live, but a place to <em style="color:var(--accent-light);">belong</em>. In the decade since our first families moved in, we've grown from neighbours into a genuine community.
+        </p>
+        <p style="color:rgba(255,255,255,0.75);font-size:16px;line-height:1.8;margin-bottom:16px;">
+          We've celebrated Diwali and Holi together, watched the children of our early residents now going to college, and built shared spaces that families actually use — every single day.
+        </p>
+        <p style="color:rgba(255,255,255,0.75);font-size:16px;line-height:1.8;">
+          The society is managed transparently by an elected committee. All accounts are shared at monthly General Body Meetings — because this is your home, and you deserve to know how it is run.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div class="p-5 rounded-2xl text-center" style="background:rgba(255,255,255,0.06);">
+          <div class="font-display text-4xl font-bold mb-1" style="color:var(--accent-light);">2013</div>
+          <div style="color:rgba(255,255,255,0.6);font-size:13px;">Year established</div>
+        </div>
+        <div class="p-5 rounded-2xl text-center" style="background:rgba(255,255,255,0.06);">
+          <div class="font-display text-4xl font-bold mb-1" style="color:var(--accent-light);">207</div>
+          <div style="color:rgba(255,255,255,0.6);font-size:13px;">Families</div>
+        </div>
+        <div class="p-5 rounded-2xl text-center" style="background:rgba(255,255,255,0.06);">
+          <div class="font-display text-4xl font-bold mb-1" style="color:var(--accent-light);">3</div>
+          <div style="color:rgba(255,255,255,0.6);font-size:13px;">Towers (A, B, C)</div>
+        </div>
+        <div class="p-5 rounded-2xl text-center" style="background:rgba(255,255,255,0.06);">
+          <div class="font-display text-4xl font-bold mb-1" style="color:var(--accent-light);">19</div>
+          <div style="color:rgba(255,255,255,0.6);font-size:13px;">Floors per tower</div>
+        </div>
+        <div class="col-span-2 p-5 rounded-2xl text-center" style="background:rgba(255,255,255,0.06);">
+          <div class="font-display text-3xl font-bold mb-1" style="color:var(--accent-light);">UPRERAPRJ15075</div>
+          <div style="color:rgba(255,255,255,0.6);font-size:13px;">RERA Registration Number</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FOOTER ─── -->
+<footer class="py-16 px-6">
+  <div class="max-w-6xl mx-auto">
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
+      <div class="col-span-full lg:col-span-1">
+        <div class="flex items-center gap-3 mb-4">
+          <div style="width:36px;height:36px;border-radius:8px;background:var(--accent-light);display:flex;align-items:center;justify-content:center;">
+            <span style="font-family:'Instrument Serif',serif;color:white;font-size:16px;font-weight:700;">D</span>
+          </div>
+          <div>
+            <div class="font-display font-semibold text-white" style="font-size:15px;">Divyansh Pratham</div>
+            <div class="text-xs" style="color:rgba(255,255,255,0.4);">Resident Portal</div>
+          </div>
+        </div>
+        <p style="color:rgba(255,255,255,0.5);font-size:13px;line-height:1.7;">Ahinsa Khand 2, Indirapuram<br>Ghaziabad — 201014, Uttar Pradesh</p>
+      </div>
+
+      <div>
+        <div class="text-xs font-bold tracking-widest uppercase mb-4" style="color:rgba(255,255,255,0.35);">Navigate</div>
+        <div class="space-y-2">
+          <a href="#facilities" class="block text-sm hover:text-white transition-colors" style="color:rgba(255,255,255,0.55);">Facilities</a>
+          <a href="#notices" class="block text-sm hover:text-white transition-colors" style="color:rgba(255,255,255,0.55);">Notice Board</a>
+          <a href="#committee" class="block text-sm hover:text-white transition-colors" style="color:rgba(255,255,255,0.55);">Committee</a>
+          <a href="#rules" class="block text-sm hover:text-white transition-colors" style="color:rgba(255,255,255,0.55);">Society Rules</a>
+          <a href="#maintenance" class="block text-sm hover:text-white transition-colors" style="color:rgba(255,255,255,0.55);">Maintenance</a>
+          <a href="#contacts" class="block text-sm hover:text-white transition-colors" style="color:rgba(255,255,255,0.55);">Contacts</a>
+        </div>
+      </div>
+
+      <div>
+        <div class="text-xs font-bold tracking-widest uppercase mb-4" style="color:rgba(255,255,255,0.35);">Office</div>
+        <div class="space-y-2 text-sm" style="color:rgba(255,255,255,0.55);">
+          <div>Ground Floor, Tower A</div>
+          <div>Mon – Sat: 10 AM – 6 PM</div>
+          <div>Sun: 11 AM – 2 PM (GBM only)</div>
+          <div class="mt-3"><a href="tel:919999000001" class="accent hover:text-white transition-colors">Security: Ext. 100</a></div>
+          <div><a href="tel:919999000003" class="accent hover:text-white transition-colors">Maintenance: Ext. 103</a></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="text-xs font-bold tracking-widest uppercase mb-4" style="color:rgba(255,255,255,0.35);">Emergency</div>
+        <div class="space-y-3">
+          <a href="tel:919999000001" class="block px-4 py-3 rounded-xl text-sm font-semibold text-center" style="background:#991B1B;color:white;">🚨 Security — Ext. 100</a>
+          <a href="tel:108" class="block px-4 py-3 rounded-xl text-sm font-semibold text-center" style="background:#1D4ED8;color:white;">🚑 Ambulance — 108</a>
+          <a href="tel:101" class="block px-4 py-3 rounded-xl text-sm font-semibold text-center" style="background:#92400E;color:white;">🔥 Fire — 101</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="border-t pt-8 flex flex-col sm:flex-row justify-between items-center gap-4" style="border-color:rgba(255,255,255,0.08);">
+      <p style="color:rgba(255,255,255,0.3);font-size:12px;">© 2026 Divyansh Pratham Welfare Society · RERA: UPRERAPRJ15075</p>
+      <p style="color:rgba(255,255,255,0.3);font-size:12px;">For residents of Ahinsa Khand 2, Indirapuram · Ghaziabad</p>
+    </div>
+  </div>
+</footer>
+
+<!-- ─── MOBILE BOTTOM BAR ─── -->
+<div class="mobile-bottom" style="padding-bottom:env(safe-area-inset-bottom,16px);">
+  <a href="tel:919999000001" class="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold text-white" style="background:#991B1B;">
+    🚨 Security
+  </a>
+  <a href="https://wa.me/919867000003?text=Hi%2C%20I%20am%20a%20Divyansh%20Pratham%20resident%20and%20need%20help%20with%3A%20" target="_blank" class="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold text-white wa-btn">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/></svg>
+    WhatsApp
+  </a>
+  <a href="#notices" class="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold" style="background:var(--accent-pale);color:var(--accent);">
+    📋 Notices
+  </a>
+</div>
+
+<!-- ─── SCRIPTS ─── -->
+<style>
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+</style>
+
+<script>
+  // Preloader
+  window.addEventListener('DOMContentLoaded', () => {
+    const bar = document.getElementById('loader-bar');
+    const loader = document.getElementById('preloader');
+    setTimeout(() => { bar.style.width = '100%'; }, 100);
+    setTimeout(() => {
+      gsap.to(loader, { opacity: 0, duration: 0.5, onComplete: () => { loader.style.display = 'none'; } });
+    }, 1200);
+  });
+
+  // Scroll progress bar
+  window.addEventListener('scroll', () => {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    document.getElementById('scroll-bar').style.width = pct + '%';
+  }, { passive: true });
+
+  // Nav scroll effect
+  const nav = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 30);
+  }, { passive: true });
+
+  // Mobile menu
+  document.getElementById('menu-toggle').addEventListener('click', () => {
+    const menu = document.getElementById('mobile-menu');
+    menu.classList.toggle('hidden');
+  });
+
+  // Close mobile menu on link click
+  document.querySelectorAll('#mobile-menu a').forEach(a => {
+    a.addEventListener('click', () => document.getElementById('mobile-menu').classList.add('hidden'));
+  });
+
+  // GSAP reveal animations
+  gsap.registerPlugin(ScrollTrigger);
+  document.querySelectorAll('.reveal').forEach(el => {
+    gsap.fromTo(el,
+      { opacity: 0, y: 28 },
+      {
+        opacity: 1, y: 0,
+        duration: 0.7,
+        ease: 'power2.out',
+        scrollTrigger: { trigger: el, start: 'top 88%', toggleActions: 'play none none none' }
+      }
+    );
+  });
+
+  // Hero entrance animations
+  gsap.from('#hero-badge', { opacity: 0, y: 20, duration: 0.6, delay: 1.4 });
+  gsap.from('#hero-h1', { opacity: 0, y: 30, duration: 0.8, delay: 1.6 });
+  gsap.from('#hero-sub', { opacity: 0, y: 20, duration: 0.6, delay: 1.9 });
+  gsap.from('#hero-cta', { opacity: 0, y: 16, duration: 0.5, delay: 2.1 });
+  gsap.from('#hero-stats', { opacity: 0, x: 30, duration: 0.8, delay: 1.8 });
+
+  // Lightbox
+  function openLightbox(src) {
+    document.getElementById('lightbox-img').src = src;
+    document.getElementById('lightbox').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+  // Mobile bottom bar safe area
+  document.querySelectorAll('.mobile-bottom').forEach(el => {
+    el.style.paddingBottom = `calc(${el.style.paddingBottom || '16px'} + env(safe-area-inset-bottom, 0px))`;
+  });
+</script>
+
+</body>
+</html>
